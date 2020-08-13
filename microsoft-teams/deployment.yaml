@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prometheus-msteams
+  name: prometheus-msteams
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-msteams
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      creationTimestamp: null
+      labels:
+        app: prometheus-msteams
+    spec:
+      containers:
+      - name: prometheus-msteams
+        image: quay.io/prometheusmsteams/prometheus-msteams:v1.3.5
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 2000
+          name: http
+          protocol: TCP
+        envFrom:
+          - configMapRef:
+              name: prometheus-msteams-env
+        volumeMounts:
+        - mountPath: /etc/prometheus-msteams
+          name: prometheus-msteams-config
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      serviceAccount: prometheus
+      serviceAccountName: prometheus
+      volumes:
+      - configMap:
+          name: prometheus-msteams-config
+        name: prometheus-msteams-config

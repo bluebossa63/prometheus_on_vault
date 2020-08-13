@@ -1,0 +1,19 @@
+groups:
+- name: example
+  rules:
+  - alert: AnsibleTowerDownd
+    annotations:
+      message: Ansible Tower has disappeared from Prometheus target discovery.
+      runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-nodeexporterdown
+    expr: |
+      absent(up{instance="dev-m-tower-1.yourdomain:9100",job="awx-dev"} == 1)
+    for: 1m
+    labels:
+      severity: critical
+#  - alert: DeadMansSwitch
+#    annotations:
+#      description: This is a DeadMansSwitch meant to ensure that the entire Alerting pipeline is functional.
+#      summary: Alerting DeadMansSwitch
+#    expr: vector(1)
+#    labels:
+#      severity: none

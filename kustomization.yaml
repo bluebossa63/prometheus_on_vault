@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configurations:
+  - kustomize-config-vault.yaml
+  - kustomize-config-configmap.yaml
+
+resources:
+  - microsoft-teams/deployment.yaml
+  - microsoft-teams/service.yaml
+  - prometheus/clusterrole-istio-system.yaml
+  - prometheus/service-account.yaml
+  - prometheus/deployment.yaml
+  - prometheus/service.yaml
+  - alertmanager/service-account.yaml
+  - alertmanager/deployment.yaml
+  - alertmanager/service.yaml
+
+patchesStrategicMerge:
+  - prometheus/vault-annotation-patch.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: alertmanager-config
+    files:
+      - alertmanager/config/alertmanager.yml
+  - name: prometheus-config
+    files:
+      - prometheus/config/config-init.hcl
+      - prometheus/config/prometheus.yml
+      - prometheus/config/rules.yml
+  - name: prometheus-msteams-config
+    files:
+      - microsoft-teams/config/config.yml
+  - name: prometheus-msteams-env
+    env: microsoft-teams/config/config.env
+
